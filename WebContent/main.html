@@ -31,7 +31,7 @@
 		border:10px solid;
 	}
 	.bordercolor-theme-heavy{
-		border-color: #111 !important;
+		border-color: #111;
 	}
 	.bordercolor-theme-light{
 		border-color: gray;
@@ -601,10 +601,12 @@
 		// 변수를 따로 두어도 회피할수 없음. 임시적으로 날짜 데이터를 변조할 경우엔 변조가 끝난후 원복시켜야 함
 		toDate.setDate(fillDate.getDate()+1);
 		toDate.setDate(curDate);
+		toDate = new Date();
 		// 일단 전체 날짜를 싹 지워주고 다른달 클래스(투명화)부여.
 		for(var i = 0 ; i < 42 ; i++)
 		{
 			$(".calendar-days-head:eq("+i+")").html("").addClass("not-current-month");
+			$(".calendar-days-head:eq("+i+")").removeClass("current-day");
 		}
 		
 		// 이전 달의 최대날짜 부터 거꾸로 채우기
@@ -619,7 +621,7 @@
 		for(var i = firstDaysWeek ; i <= maxDay + (firstDaysWeek-1) ; i++)
 		{
 			$(".calendar-days-head:eq("+i+")").html(curMday).removeClass("not-current-month");
-			if(curMday == toDate.getDate())
+			if(curMday == toDate.getDate() && curMonth == (toDate.getMonth()+1) && curYear == toDate.getFullYear())
 			{
 				$(".calendar-days-head:eq("+i+")").addClass("current-day");
 			}
@@ -633,51 +635,68 @@
 			nextMDay++;
 		}
 		
-		/* 날짜 칸 드래그 이동하는 부분 */
-		var div_L = 0;
-		var div_T = 0;
-		var targetObj;
+	}
+	/* 날짜 칸 드래그 이동하는 부분 */
+	var div_L = 0;
+	var div_T = 0;
+	var targetObj;
 
-		function getLeft(obj){
-		     return parseInt(obj.css("left"));
-		}
-		function getTop(obj){
-			console.log("top"+parseInt(obj.css("top")));
-		    return parseInt(obj.css("top"));
-		}
-		
-		function dragDiv(e)
+	function getLeft(obj){
+	     return parseInt(obj.css("left"));
+	}
+	function getTop(obj){
+		console.log("top"+parseInt(obj.css("top")));
+	    return parseInt(obj.css("top"));
+	}
+	
+	function dragDiv(e)
+	{
+		targetObj.css("position", "relative");
+		var e_obj = window.event? window.event : e;
+	    dmvx = parseInt(e_obj.clientX + div_L);
+	    dmvy = parseInt(e_obj.clientY + div_T);
+	    targetObj.css("left", dmvx+"px");
+	    console.log(targetObj.css("left"));
+	    targetObj.css("top" , dmvy+"px");
+	    return false;
+	}
+	
+	$(".calendar-days").mousedown(function(e){
+		targetObj = $(this);
+	    var e_obj = window.event? window.event : e;
+	    div_L = getLeft(targetObj) - e_obj.clientX;
+	    div_T = getTop(targetObj) - e_obj.clientY;
+	    
+	    document.onmousemove = dragDiv;
+	    document.onmouseup = stopDrag;
+	    if(e_obj.preventDefault) {e_obj.preventDefault();} 
+	});
+	
+	$(".calendar-days").mouseup(function(){
+		$(this).css("position", "static");
+	});
+	
+	function stopDrag()
+	{
+	    document.onmousemove = null;
+	    document.onmouseup = null;
+	}
+	
+	/* 칸 클릭시 해당 날짜 반환 부분 */
+	$(".calendar-days").click(function(){
+		// 현재 달에 해당하는 칸만 반응하도록.
+		if(!$(this).children().hasClass("not-current-month"))
 		{
-			targetObj.css("position", "relative");
-			var e_obj = window.event? window.event : e;
-		    dmvx = parseInt(e_obj.clientX + div_L);
-		    dmvy = parseInt(e_obj.clientY + div_T);
-		    targetObj.css("left", dmvx+"px");
-		    console.log(targetObj.css("left"));
-		    targetObj.css("top" , dmvy+"px");
-		    return false;
+			// curYear, curMonth 에 실제 해당하는 년, 월 정보가 캐싱되어있음.
+			// toDate 는 언제나 현재 시간으로 돌려놓아야 하므로 이렇게 해야함.
+			alert(curYear+"-"+curMonth+"-"+$(this).children(".calendar-days-head").html());			
 		}
-		
-		$(".calendar-days").mousedown(function(e){
-			targetObj = $(this);
-		    var e_obj = window.event? window.event : e;
-		    div_L = getLeft(targetObj) - e_obj.clientX;
-		    div_T = getTop(targetObj) - e_obj.clientY;
-		    
-		    document.onmousemove = dragDiv;
-		    document.onmouseup = stopDrag;
-		    if(e_obj.preventDefault) {e_obj.preventDefault();} 
-		});
-		
-		$(".calendar-days").mouseup(function(){
-			$(this).css("position", "static");
-		});
-		
-		function stopDrag()
-		{
-		    document.onmousemove = null;
-		    document.onmouseup = null;
-		}
+	});
+	
+	/* 테마별 CSS 색 변경하는 부분 */
+	function theme()
+	{
+		$(".bordercolor-theme-heavy").css("border-color", "red");
 	}
 </script>
 </body>
