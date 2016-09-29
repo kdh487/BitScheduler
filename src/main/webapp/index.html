@@ -962,6 +962,23 @@
 		$(".panel-body").css("height", $("daydetail-body").css("height") - $(".panel-heading").css("height"));
 		var schedule = $("#schedule1").parent();
 		$("#schedule1").clone().appendTo(schedule);
+		// DB로부터 데이터를 AJAX 로 요청하여 반환받는 테스트
+		$.ajax({
+			url: "../BitSchedule/test.json",
+			dataType: "json"
+		})
+		.done(function(result){
+			console.log(result);
+			var sd = new Date(result[0].startDate);
+			console.log(sd);
+			sd = sd.getFullYear() + "-" + (sd.getMonth()+1) + "-" + sd.getDate();
+			alert("no: " + result[0].no
+					+", sd: " + sd
+					+", ed: " + result[0].endDate
+					+", md: " + result[0].modDate
+					+", mmd: " + result[0].modDeDate					
+			);
+		});
 	})();
 	/* 팝업창과 가림막 숨기기/보이기 */
 	function popupDayDetail(bool)
